@@ -1,60 +1,50 @@
-# CerebroDiscover — Neuro-Symbolic Research Scientist (Alzheimer's)
 
-This repository contains several small services and a Streamlit dashboard that together form a research-assistant pipeline for hypothesis generation, symbolic validation, and experiment design.
+# Neuro-Symbolic Research Scientist — Alzheimer's AI
 
-Services
-- `person_A/ingest_search` — FastAPI service exposing `/search` (port 8000)
-- `person_A/hypothesis_gen` — FastAPI service exposing `/generate` (port 8001)
-- `person_B/z3_validator` — FastAPI service exposing `/validate` (port 8002)
-- `person_B/experiment_design` — FastAPI service exposing `/design` (port 8003)
-- `person_B/dashboard` — Streamlit app that orchestrates the pipeline
+This project is a modular pipeline for neuro-symbolic research on Alzheimer's disease, combining LLM-driven hypothesis generation, symbolic validation, and experiment design. It features:
 
-Quick start (dev)
-1. Copy environment variables template:
+- **FastAPI microservices** for ingest/search, hypothesis generation, symbolic validation, and experiment design
+- **Streamlit dashboard** for orchestration and visualization
 
-   Copy `.env.example` to `.env` and fill in API keys.
+## Project Structure
 
-2. Install dependencies (use a virtualenv / conda):
+- `person_A/ingest_search` — `/search` API (port 8000)
+- `person_A/hypothesis_gen` — `/generate` API (port 8001)
+- `person_B/z3_validator` — `/validate` API (port 8002)
+- `person_B/experiment_design` — `/design` API (port 8003)
+- `person_B/dashboard` — Streamlit UI (calls all services)
 
-   See `requirements.txt` — install via pip.
+## Getting Started
 
-3. Start services (one terminal per service) or use the provided `dev_start.ps1` PowerShell script for local development.
+1. **Clone repo & set up environment**
+   - Copy `.env.example` to `.env` and add your API keys
+   - Install dependencies: `pip install -r requirements.txt`
 
-Service run commands (examples)
+2. **Run services** (each in a separate terminal, or use `dev_start.ps1`):
+   ```powershell
+   # Ingest/Search
+   cd person_A/ingest_search; uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+   # Hypothesis Generation
+   cd person_A/hypothesis_gen; uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+   # Symbolic Validation
+   cd person_B/z3_validator; uvicorn main:app --host 127.0.0.1 --port 8002 --reload
+   # Experiment Design
+   cd person_B/experiment_design; uvicorn main:app --host 127.0.0.1 --port 8003 --reload
+   # Dashboard
+   cd person_B/dashboard; streamlit run app.py
+   ```
 
-PowerShell examples (one service per terminal):
+## Configuration
 
-```powershell
-# In person_A/ingest_search
-cd person_A/ingest_search
-uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+- Set `CEREBRAS_API_KEY` and `PINECONE_API_KEY` in `.env`
+- Ports: 8000–8003 (update in `dashboard/utils.py` if changed)
+- ML dependencies may require CPU/GPU; `z3-solver` may need Visual C++ build tools on Windows
 
-# In person_A/hypothesis_gen
-cd person_A/hypothesis_gen
-uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+## Developer Notes
 
-# In person_B/z3_validator
-cd person_B/z3_validator
-uvicorn main:app --host 127.0.0.1 --port 8002 --reload
+- Modular, service-oriented architecture for rapid prototyping
+- Fallback logic for LLM calls if API keys are missing
+- Data and chunk files in `person_A/data` and `person_A/chunks`
 
-# In person_B/experiment_design
-cd person_B/experiment_design
-uvicorn main:app --host 127.0.0.1 --port 8003 --reload
-
-# Start dashboard
-cd person_B/dashboard
-streamlit run app.py
-```
-
-Notes
-- The dashboard (`person_B/dashboard/app.py`) calls the four services on localhost ports 8000–8003. If you change ports, update `person_B/dashboard/utils.py`.
-- Large ML deps (torch, transformers, sentence-transformers) may take time and require appropriate platforms (CPU/GPU). `z3-solver` is a compiled package and may require Visual C++ build tools on Windows if a binary wheel is not available.
-- Two external API keys are expected in the codebase and should be set in `.env`:
-  - `CEREBRAS_API_KEY` — used by LLaMA calls in `hypothesis_gen` and `experiment_design` modules
-  - `PINECONE_API_KEY` — used by the embeddings/indexing module in `person_A/ingest_search`
-
-Safety / local dev hints
-- If you don't have access to Cerebras, `person_B/experiment_design/main.py` and `person_A/hypothesis_gen/` include fallback behavior (template or heuristic) when the LLM call fails.
-
-Contact
-- If you want I can add a `.env.example`, dev-start scripts, and a few smoke tests next. Tell me which you'd prefer.
+---
+For issues, feature requests, or contributions, open a GitHub issue or pull request.
