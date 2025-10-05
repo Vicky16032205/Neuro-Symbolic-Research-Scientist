@@ -107,19 +107,19 @@ from pathlib import Path
 
 # Set page config for a professional and wide layout
 st.set_page_config(
-    page_title="CerebroDiscover: Alzheimer’s Research Pipeline",
+    page_title="Neuro Agent: Alzheimer’s Research Pipeline",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for a stunning, neuroscience-inspired UI
-st.markdown("""
+# Custom CSS for a stunning, neuroscience-inspired UI (matching your image)
+st.html("""
 <style>
-    /* Main background with gradient */
-    .main {
-        background: linear-gradient(135deg, #1e1e2f 0%, #2c3e50 100%);
-        font-family: 'Roboto', sans-serif;
+    /* Global dark theme */
+    .stApp {
+        background: #0f0c14;
+        color: #ecf0f1;
     }
     /* Sidebar styling */
     .sidebar .sidebar-content {
@@ -160,12 +160,9 @@ st.markdown("""
         transform: scale(1.05);
         box-shadow: 0 5px 15px rgba(52, 152, 219, 0.5);
     }
-    /* Main content styling */
-    .stApp > header {
-        background: transparent;
-    }
-    .card {
-        background: #2c3e50;
+    /* Main content card */
+    .main-card {
+        background: #1e1e2f;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -174,7 +171,7 @@ st.markdown("""
         border-left: 4px solid #3498db;
         transition: transform 0.2s ease;
     }
-    .card:hover {
+    .main-card:hover {
         transform: translateY(-5px);
     }
     .header {
@@ -225,69 +222,48 @@ st.markdown("""
         transform: scale(1.05);
         box-shadow: 0 5px 15px rgba(39, 174, 96, 0.5);
     }
+    /* Help icon styling */
+    .help-icon {
+        color: #95a5a6;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-left: 5px;
+    }
+    .help-icon:hover {
+        color: #3498db;
+    }
+    /* Top right status */
+    .status-bar {
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        background: rgba(255,255,255,0.1);
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        color: #ecf0f1;
+        z-index: 999;
+    }
     /* Ensure text visibility */
     .stMarkdown p, .stMarkdown li, .stMarkdown strong {
         color: #ecf0f1 !important;
     }
-    /* Tooltip for help */
-    .tooltip {
-        position: relative;
-        display: inline-block;
-    }
-    .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 200px;
-        background-color: #2c3e50;
-        color: #ecf0f1;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -100px;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-    .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-    }
-    </style>
-""", unsafe_allow_html=True)
+</style>
+""")
 
-# Landing Page
-def display_landing_page():
-    st.markdown("<h1 class='header'>CerebroDiscover 🧠</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='subheader'>Unraveling Alzheimer’s with Neuro-Symbolic AI</p>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class='card'>
-        <p><strong>CerebroDiscover</strong> is a cutting-edge neuro-symbolic AI pipeline designed to accelerate Alzheimer’s research. By integrating semantic search, hypothesis generation, logical validation, and experiment design, it empowers researchers to uncover novel insights into Alzheimer’s pathology.</p>
-        <h3>How It Works</h3>
-        <ul>
-            <li><strong>🔍 Search</strong>: Query a curated database of Alzheimer’s papers.</li>
-            <li><strong>🤖 Generate</strong>: Synthesize hypotheses using advanced language models.</li>
-            <li><strong>✔️ Validate</strong>: Ensure logical consistency with Z3 theorem proving.</li>
-            <li><strong>🧬 Design</strong>: Create actionable experiment blueprints.</li>
-        </ul>
-        <h3>Hackathon Vision</h3>
-        <p>Built for the <strong>[Your Hackathon Name] Hackathon 2025</strong>, CerebroDiscover bridges AI and neuroscience to tackle Alzheimer’s disease. Explore by entering a research question in the sidebar!</p>
-        <p><strong>Team</strong>: NeuroAI Innovators | <em>Built with ❤️ by [Your Names]</em><br>
-        <strong>Contact</strong>: <a href="mailto:team.email@example.com" style="color: #3498db;">team.email@example.com</a></p>
-    </div>
-    """, unsafe_allow_html=True)
+st.html("<div class='status-bar'>🔗 CONNECTING</div>")
 
-# Sidebar Controls
 with st.sidebar:
-    st.markdown("<h2>🧠 Pipeline Controls</h2>", unsafe_allow_html=True)
-    st.markdown("<p class='card'>Configure and launch the CerebroDiscover pipeline.</p>", unsafe_allow_html=True)
+    st.html("<h2>💬 Pipeline Controls</h2>")
+    st.html("<p class='main-card'>Configure and launch the CerebroDiscover pipeline.</p>")
+
     query = st.text_input(
         "Research Question",
         value="Why do anti-amyloid drugs fail?",
         placeholder="e.g., Role of tau in Alzheimer's",
         help="Enter a specific question about Alzheimer’s disease."
     )
+
     top_k = st.number_input(
         "Top-k Papers",
         min_value=1,
@@ -295,24 +271,53 @@ with st.sidebar:
         value=3,
         help="Number of papers to retrieve (1-10)."
     )
+
     show_metrics = st.checkbox(
         "Show Performance Metrics",
         value=True,
         help="Display latency for each pipeline step."
     )
+
     show_raw_json = st.checkbox(
         "Show Raw JSON Outputs",
         value=False,
         help="Show raw API responses for debugging."
     )
-    st.markdown("<div class='tooltip'>Run Pipeline<button class='stButton'><span class='tooltiptext'>Start the full research pipeline</span></button></div>", unsafe_allow_html=True)
+
     run = st.button("🚀 Run Discovery Pipeline")
 
-if not run:
-    display_landing_page()
-else:
+# Main Content Card
+st.html("<h1 class='header'>Neuro-Symbolic Research Scientist Agent for Alzheimer’s Disease 🧠</h1>")
+st.html("<p class='subheader'>Unraveling Alzheimer’s Disease with AI</p>")
+
+st.html("""
+<div class='main-card'>
+    <p><strong style="color:#60a5fa;">Neuro-Symbolic Research Scientist</strong> is an advanced research assistant designed to accelerate discovery in Alzheimer’s disease. 
+    By combining intelligent literature retrieval, hypothesis generation, logical validation, and experiment design, it simulates the reasoning workflow of a human neuroscientist — bridging AI and biology seamlessly.</p>
+
+    <h3 style="color:#93c5fd;">How It Works</h3>
+    <ul style="line-height:1.8;">
+        <li><strong>🔵 Ingest & Search (Port 8000)</strong>: Searches a curated Pinecone-based vector database of Alzheimer’s literature.</li>
+        <li><strong>🤖 Hypothesis Generation (Port 8001)</strong>: Reads the retrieved literature and formulates testable hypotheses.</li>
+        <li><strong>✅ Logical Validation (Port 8002)</strong>: Uses a Z3 theorem prover to check the hypothesis for logical consistency.</li>
+        <li><strong>🧪 Experiment Design (Port 8003)</strong>: If validated, generates a complete experimental blueprint for lab testing.</li>
+    </ul>
+
+    <h3 style="color:#93c5fd;">Hackathon Vision</h3>
+    <p>Built for the <strong>FutureStack GenAI Hackathon 2025</strong>, 
+    <strong>Neuro-Scientist</strong> bridges AI and neuroscience to tackle Alzheimer’s disease.</p>
+
+    <p><strong>Team</strong>: CoreV2 | <em>Built with ❤️ by Vicky Gupta & Vaibhav Adhikari</em><br>
+    <strong>Tech Stack</strong>: Python, FastAPI, Z3, Pinecone, Cerebras LLaMA3.1-8B, Streamlit, Docker<br>
+    <strong>Contact</strong>: 
+    <a href="mailto:vickyguptagkp55@gmail.com" style="color: #60a5fa;">neuroai</a></p>
+</div>
+""")
+
+# Only run pipeline if button clicked
+if run:
     progress = st.progress(0)
-    st.markdown("<h2 class='subheader'>Pipeline Results</h2>", unsafe_allow_html=True)
+    st.html("<h2 class='subheader'>Pipeline Results</h2>")
     
     # Step 1: Search
     try:
@@ -322,14 +327,14 @@ else:
             progress.progress(25)
             st.subheader("📄 Papers Retrieved")
             for p in papers:
-                st.markdown(f"""
-                <div class='card'>
+                st.html(f"""
+                <div class='main-card'>
                     <strong>Title</strong>: {p.get('title', 'N/A')} (ID: {p.get('id', 'N/A')})<br>
                     <strong>Abstract</strong>: {p.get('abstract', 'N/A')[:300] + '...' if len(p.get('abstract', '')) > 300 else p.get('abstract', 'N/A')}
                 </div>
-                """, unsafe_allow_html=True)
+                """)
             if show_metrics:
-                st.markdown(f"<div class='metric-card'>Search Latency: {res['latency']:.2f} s</div>", unsafe_allow_html=True)
+                st.html(f"<div class='metric-card'>Search Latency: {res['latency']:.2f} s</div>")
             if show_raw_json:
                 with st.expander("Raw Search Output"):
                     st.json(res["response"])
@@ -343,23 +348,23 @@ else:
             hyp = call_generate(papers, query)["response"]
             progress.progress(50)
             st.subheader("🧪 Generated Hypothesis")
-            st.markdown(f"""
-            <div class='card'>
+            st.html(f"""
+            <div class='main-card'>
                 <strong>Gap</strong>: {hyp.get('gap', 'N/A')}<br>
                 <strong>Hypothesis</strong>: {hyp.get('hypothesis', 'N/A')}<br>
                 <strong>Prediction</strong>: {hyp.get('prediction', 'N/A')}
             </div>
-            """, unsafe_allow_html=True)
-            st.markdown("<strong>Evidence</strong>", unsafe_allow_html=True)
+            """)
+            st.html("<strong>Evidence</strong>")
             for e in hyp.get("evidence", []):
-                st.markdown(f"<div class='card'><p>🔹 {e or 'No evidence'}</p></div>", unsafe_allow_html=True)
-            st.markdown("<strong>Logical Rules</strong>", unsafe_allow_html=True)
+                st.html(f"<div class='main-card'><p>🔹 {e or 'No evidence'}</p></div>")
+            st.html("<strong>Logical Rules</strong>")
             rules_df = pd.DataFrame(hyp.get("rules", []), columns=["Rule"])
-            st.markdown(f"<div class='card'>{rules_df.to_html(index=False) if not rules_df.empty else '<p>No rules generated</p>'}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card'><strong>Classification</strong>: {hyp.get('classification', 'Unknown')}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card'><strong>Further Insights</strong>: {hyp.get('further_data', 'None')}</div>", unsafe_allow_html=True)
+            st.html(f"<div class='main-card'>{rules_df.to_html(index=False) if not rules_df.empty else '<p>No rules generated</p>'}</div>")
+            st.html(f"<div class='main-card'><strong>Classification</strong>: {hyp.get('classification', 'Unknown')}</div>")
+            st.html(f"<div class='main-card'><strong>Further Insights</strong>: {hyp.get('further_data', 'None')}</div>")
             if show_metrics:
-                st.markdown(f"<div class='metric-card'>Hypothesis Generation Latency: {call_generate(papers, query)['latency']:.2f} s</div>", unsafe_allow_html=True)
+                st.html(f"<div class='metric-card'>Hypothesis Generation Latency: {call_generate(papers, query)['latency']:.2f} s</div>")
             if show_raw_json:
                 with st.expander("Raw Hypothesis Output"):
                     st.json(hyp)
@@ -388,14 +393,14 @@ else:
                 st.success("✅ Hypothesis is VALID")
             else:
                 st.error("❌ Hypothesis is INVALID")
-            st.markdown(f"<div class='card'><strong>Reason</strong>: {validation_result.get('reason', 'N/A')}</div>", unsafe_allow_html=True)
-            st.markdown("<strong>Proof Trace</strong>", unsafe_allow_html=True)
+            st.html(f"<div class='main-card'><strong>Reason</strong>: {validation_result.get('reason', 'N/A')}</div>")
+            st.html("<strong>Proof Trace</strong>")
             for step in validation_result.get("proof_trace", []):
-                st.markdown(f"<div class='card'><p>🔹 {step or 'No step'}</p></div>", unsafe_allow_html=True)
+                st.html(f"<div class='main-card'><p>🔹 {step or 'No step'}</p></div>")
             if validation_result.get("warnings"):
                 st.warning("**Warnings**: " + "; ".join(validation_result.get("warnings", [])))
             if show_metrics:
-                st.markdown(f"<div class='metric-card'>Validation Latency: {val['latency']:.2f} s</div>", unsafe_allow_html=True)
+                st.html(f"<div class='metric-card'>Validation Latency: {val['latency']:.2f} s</div>")
             if show_raw_json:
                 with st.expander("Raw Validation Output"):
                     st.json(val["response"])
@@ -422,8 +427,8 @@ else:
                 exp = result["response"]
                 progress.progress(100)
                 st.subheader("🧪 Experiment Blueprint")
-                st.markdown(f"""
-                <div class='card'>
+                st.html(f"""
+                <div class='main-card'>
                     <strong>Model</strong>: {exp.get('model', 'N/A')}<br>
                     <strong>Groups</strong>: {', '.join(exp.get('groups', []))}<br>
                     <strong>Sample Size per Group</strong>: {exp.get('n_per_group', 'N/A')}<br>
@@ -432,7 +437,7 @@ else:
                     <strong>Outcome Measures</strong>: {', '.join(exp.get('outcome_measures', []))}<br>
                     <strong>Expected Result</strong>: {exp.get('expected_result', 'N/A')}
                 </div>
-                """, unsafe_allow_html=True)
+                """)
                 st.download_button(
                     label="📥 Download Experiment JSON",
                     data=json.dumps(exp, indent=2),
@@ -447,12 +452,12 @@ else:
                         mime="text/plain"
                     )
                 if show_metrics:
-                    st.markdown(f"<div class='metric-card'>Experiment Design Latency: {result['latency']:.2f} s</div>", unsafe_allow_html=True)
+                    st.html(f"<div class='metric-card'>Experiment Design Latency: {result['latency']:.2f} s</div>")
                 if show_raw_json:
                     with st.expander("Raw Experiment Design Output"):
                         st.json(exp)
         except Exception as e:
             st.error(f"Experiment design failed: {str(e)}")
-            st.json(design_input)  # Debug input
+            st.json(design_input)
     else:
         st.info("Experiment design skipped because hypothesis is invalid or validation failed.")
