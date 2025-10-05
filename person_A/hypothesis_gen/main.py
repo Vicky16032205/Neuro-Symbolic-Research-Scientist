@@ -1,32 +1,3 @@
-# from fastapi import FastAPI, Request
-# from pydantic import BaseModel
-# from typing import List, Dict
-# from llama3_api import generate_hypothesis_from_papers
-# from dotenv import load_dotenv
-# load_dotenv()
-
-# class Paper(BaseModel):
-#     id: int
-#     title: str
-#     abstract: str
-
-# class PapersRequest(BaseModel):
-#     papers: List[Paper]
-
-# app = FastAPI()
-
-# @app.post("/generate")
-# def generate_hypothesis(request: PapersRequest) -> Dict:
-#     papers_list = [p.dict() for p in request.papers]
-#     hypothesis = generate_hypothesis_from_papers(papers_list)
-#     return hypothesis
-
-
-
-
-
-
-
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import List, Dict, Optional
@@ -43,7 +14,6 @@ class PapersRequest(BaseModel):
     papers: List[Paper]
     query: str
 
-# Define the response model to include new fields
 class HypothesisResponse(BaseModel):
     gap: str
     hypothesis: str
@@ -59,15 +29,10 @@ app = FastAPI()
 def generate_hypothesis(request: PapersRequest) -> Dict:
     papers_list = [p.dict() for p in request.papers]
     hypothesis = generate_hypothesis_from_papers(papers_list, request.query)
-    # Defensive normalization: ensure fields match the response model types
-    # Some LLM responses may return objects for fields expected to be strings
-    # Convert 'gap' and other string fields to strings if necessary.
     try:
         if 'gap' in hypothesis and not isinstance(hypothesis['gap'], str):
-            # If gap is a dict/list, stringify it preserving readable format
             import json as _json
             hypothesis['gap'] = _json.dumps(hypothesis['gap'], ensure_ascii=False)
-        # Ensure other fields exist and have correct types
         hypothesis.setdefault('hypothesis', '')
         if not isinstance(hypothesis.get('hypothesis'), str):
             hypothesis['hypothesis'] = str(hypothesis.get('hypothesis'))
@@ -87,7 +52,6 @@ def generate_hypothesis(request: PapersRequest) -> Dict:
         if not isinstance(hypothesis.get('further_data'), str):
             hypothesis['further_data'] = str(hypothesis.get('further_data'))
     except Exception:
-        # On unexpected structure, coerce entire hypothesis to a safe minimal shape
         hypothesis = {
             'gap': str(hypothesis.get('gap', '')) if isinstance(hypothesis, dict) else str(hypothesis),
             'hypothesis': str(hypothesis.get('hypothesis', '') if isinstance(hypothesis, dict) else ''),

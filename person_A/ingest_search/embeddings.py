@@ -6,21 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Load environment variables
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 INDEX_NAME = "neuro-scientist"
-
-# Initialize Pinecone client
 pc = Pinecone(api_key=PINECONE_API_KEY)
-
-# Sentence transformer model
 model = SentenceTransformer("stsb-roberta-large")
 
-# Create or connect to Pinecone index
 def initialize_index():
-
     desired_dim = model.get_sentence_embedding_dimension()
-    # Check if index exists, create if it doesn't
     if INDEX_NAME not in pc.list_indexes().names():
         pc.create_index(
             name=INDEX_NAME,
@@ -33,10 +25,8 @@ def initialize_index():
         )
     return pc.Index(INDEX_NAME)
 
-# Initialize index
 index = initialize_index()
 
-# ------------------ Embedding Creation ------------------ #
 def create_embeddings(json_dir):
     for json_file in os.listdir(json_dir):
         if json_file.endswith(".json"):

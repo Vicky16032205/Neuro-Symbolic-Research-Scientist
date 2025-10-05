@@ -14,5 +14,3 @@ def search_papers(query: str = Query(...)) -> Dict[str, object]:
     """
     papers = semantic_search(query)
     return {"papers": papers, "query": query}
-
-# Run: uvicorn main:app --host 0.0.0.0 --port 8000

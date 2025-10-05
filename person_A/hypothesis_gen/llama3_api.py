@@ -1,92 +1,3 @@
-# import os
-# import requests
-# import json
-# import re
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
-# API_URL = "https://api.cerebras.ai/v1/chat/completions"
-# HEADERS = {
-#     "Authorization": f"Bearer {CEREBRAS_API_KEY}",
-#     "Content-Type": "application/json"
-# }
-
-# def fix_json_with_llm(raw_text):
-#     prompt = f"""
-# You are a helpful assistant. Convert the following text into a valid JSON object with keys: gap, hypothesis, evidence (list), prediction. Only return the JSON object.
-# Text:
-# {raw_text}
-# """
-#     payload = {
-#         "model": "llama3.1-8b",
-#         "messages": [{"role": "user", "content": prompt}],
-#         "max_tokens": 300,
-#         "temperature": 0.0
-#     }
-#     resp = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
-#     print("Fix JSON LLM response:", resp.status_code, resp.text)
-#     resp.raise_for_status()
-#     content = resp.json().get("choices", [])[0].get("message", {}).get("content", "")
-#     try:
-#         return json.loads(content)
-#     except Exception as e:
-#         print("Final JSON decode error:", e)
-#         return {"error": "Could not decode JSON after fix", "raw": content}
-
-# def generate_hypothesis_from_papers(papers):
-#     papers_str = "\n".join(
-#         [f"Title: {p['title']}\nAbstract: {p['abstract']}" for p in papers]
-#     )
-#     prompt = f"""
-# You are a neuroscientist. Read these paper summaries and generate a hypothesis about Alzheimer's:
-# {papers_str}
-
-# Return ONLY a valid JSON object with the following keys: gap, hypothesis, evidence (list), prediction.
-# Do not include any explanation, markdown, or text outside the JSON. Your entire response must be a single JSON object.
-# """
-#     payload = {
-#         "model": "llama3.1-8b",
-#         "messages": [{"role": "user", "content": prompt}],
-#         "max_tokens": 500,
-#         "temperature": 0.7
-#     }
-#     resp = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
-#     print("Cerebras response:", resp.status_code, resp.text)
-#     resp.raise_for_status()
-#     content = resp.json().get("choices", [])[0].get("message", {}).get("content", "")
-
-#     # Try direct JSON parsing first
-#     try:
-#         return json.loads(content)
-#     except Exception as e:
-#         print("Direct JSON decode error:", e)
-#         # fallback: try to extract JSON object using regex
-#         match = re.search(r"({.*})", content, re.DOTALL)
-#         if match:
-#             json_str = match.group(1)
-#             try:
-#                 return json.loads(json_str)
-#             except Exception as e:
-#                 print("Regex JSON decode error:", e)
-#                 # If still fails, use LLM to fix
-#                 return fix_json_with_llm(json_str)
-#         # If no JSON found, use LLM to fix the whole content
-#         return fix_json_with_llm(content)
-
-
-
-
-
-
-
-
-
-
-
-
-
 import os
 import requests
 import json
@@ -123,64 +34,6 @@ Text:
     except Exception as e:
         print("Final JSON decode error:", e)
         return {"error": "Could not decode JSON after fix", "raw": content}
-
-# def generate_hypothesis_from_papers(papers):
-#     papers_str = "\n".join(
-#         [f"Title: {p['title']}\nAbstract: {p['abstract']}" for p in papers]
-#     )
-#     prompt = f"""
-# You are a neuroscientist. Read these paper summaries and dynamically generate logical rules based on key insights from the papers. Use the format 'Implies(predicate1, predicate2)' for rules (e.g., 'Implies(chronic_inflammation, microglia_dysfunction)'). Then, use those rules to generate a hypothesis about Alzheimer's.
-
-# Return ONLY a valid JSON object with the following keys: 
-# - gap: A string describing the research gap.
-# - hypothesis: A string stating the hypothesis.
-# - evidence: A list of strings with supporting evidence from papers.
-# - prediction: A string with testable predictions.
-# - rules: A list of strings, each a logical rule in the format 'Implies(predicate1, predicate2)' derived dynamically from the papers.
-# - classification: A string indicating if the hypothesis is 'supported' or 'unsupported'.
-# - further_data: A string with additional insights derived from the rules.
-
-# Do not include any explanation, markdown, or text outside the JSON. Your entire response must be a single JSON object.
-# """
-#     payload = {
-#         "model": "llama3.1-8b",
-#         "messages": [{"role": "user", "content": prompt}],
-#         "max_tokens": 500,
-#         "temperature": 0.7
-#     }
-#     resp = requests.post(API_URL, headers=HEADERS, json=payload, timeout=30)
-#     print("Cerebras response:", resp.status_code, resp.text)
-#     resp.raise_for_status()
-#     content = resp.json().get("choices", [])[0].get("message", {}).get("content", "")
-
-#     try:
-#         result = json.loads(content)
-#     except Exception as e:
-#         print("Direct JSON decode error:", e)
-#         match = re.search(r"({.*})", content, re.DOTALL)
-#         if match:
-#             json_str = match.group(1)
-#             try:
-#                 result = json.loads(json_str)
-#             except Exception as e:
-#                 print("Regex JSON decode error:", e)
-#                 result = fix_json_with_llm(json_str)
-#         else:
-#             result = fix_json_with_llm(content)
-
-#     if "rules" in result and isinstance(result["rules"], list):
-#         classification = classify_based_on_rules(result["hypothesis"], result["rules"])
-#         result["classification"] = classification["category"]
-#         result["further_data"] = classification["insights"]
-#     else:
-#         result["classification"] = "unknown"
-#         result["further_data"] = "No rules generated for further processing."
-
-#     return result
-
-
-
-
 
 def generate_hypothesis_from_papers(papers, query=''):
     papers_str = "\n".join(
@@ -243,13 +96,6 @@ Do not include any explanation, markdown, or text outside the JSON. Your entire 
         result.setdefault("further_data", "Classification failed due to internal error.")
 
     return result
-
-
-
-
-
-
-
 
 def classify_based_on_rules(hypothesis: str, rules: list) -> dict:
     supported_count = 0
