@@ -16,3 +16,4 @@ pdfkit
 python-dotenv
 numpy
 PyPDF2
+pandas

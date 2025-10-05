@@ -41,6 +41,7 @@ class Paper(BaseModel):
 
 class PapersRequest(BaseModel):
     papers: List[Paper]
+    query: str
 
 # Define the response model to include new fields
 class HypothesisResponse(BaseModel):
@@ -57,5 +58,44 @@ app = FastAPI()
 @app.post("/generate", response_model=HypothesisResponse)
 def generate_hypothesis(request: PapersRequest) -> Dict:
     papers_list = [p.dict() for p in request.papers]
-    hypothesis = generate_hypothesis_from_papers(papers_list)
+    hypothesis = generate_hypothesis_from_papers(papers_list, request.query)
+    # Defensive normalization: ensure fields match the response model types
+    # Some LLM responses may return objects for fields expected to be strings
+    # Convert 'gap' and other string fields to strings if necessary.
+    try:
+        if 'gap' in hypothesis and not isinstance(hypothesis['gap'], str):
+            # If gap is a dict/list, stringify it preserving readable format
+            import json as _json
+            hypothesis['gap'] = _json.dumps(hypothesis['gap'], ensure_ascii=False)
+        # Ensure other fields exist and have correct types
+        hypothesis.setdefault('hypothesis', '')
+        if not isinstance(hypothesis.get('hypothesis'), str):
+            hypothesis['hypothesis'] = str(hypothesis.get('hypothesis'))
+        hypothesis.setdefault('evidence', [])
+        if not isinstance(hypothesis.get('evidence'), list):
+            hypothesis['evidence'] = [str(hypothesis.get('evidence'))]
+        hypothesis.setdefault('prediction', '')
+        if not isinstance(hypothesis.get('prediction'), str):
+            hypothesis['prediction'] = str(hypothesis.get('prediction'))
+        hypothesis.setdefault('rules', [])
+        if not isinstance(hypothesis.get('rules'), list):
+            hypothesis['rules'] = [str(hypothesis.get('rules'))]
+        hypothesis.setdefault('classification', 'unknown')
+        if not isinstance(hypothesis.get('classification'), str):
+            hypothesis['classification'] = str(hypothesis.get('classification'))
+        hypothesis.setdefault('further_data', 'No further insights.')
+        if not isinstance(hypothesis.get('further_data'), str):
+            hypothesis['further_data'] = str(hypothesis.get('further_data'))
+    except Exception:
+        # On unexpected structure, coerce entire hypothesis to a safe minimal shape
+        hypothesis = {
+            'gap': str(hypothesis.get('gap', '')) if isinstance(hypothesis, dict) else str(hypothesis),
+            'hypothesis': str(hypothesis.get('hypothesis', '') if isinstance(hypothesis, dict) else ''),
+            'evidence': hypothesis.get('evidence', []) if isinstance(hypothesis, dict) else [],
+            'prediction': str(hypothesis.get('prediction', '') if isinstance(hypothesis, dict) else ''),
+            'rules': hypothesis.get('rules', []) if isinstance(hypothesis, dict) else [],
+            'classification': 'unknown',
+            'further_data': 'Normalization failed'
+        }
+
     return hypothesis
