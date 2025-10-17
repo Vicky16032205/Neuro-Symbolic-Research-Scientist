@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sentence-transformers
+pinecone
+PyPDF2
+python-dotenv
+z3-solver
+cerebras-cloud-sdk
+pandas
+torch
